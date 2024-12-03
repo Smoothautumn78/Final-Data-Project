@@ -1,0 +1,44 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*.
+
+```{r}
+suppressPackageStartupMessages({
+library(tidyverse)
+library(patchwork)
+theme_set(theme_bw())
+library(tidymodels)
+library(arrow)
+})
+```
+
+Import Data:
+
+```{r}
+Tor_hitting <- read_csv("TOR_batting.csv")
+```
+
+Cleaning:
+
+```{r}
+Tor_hitting_clean <- 
+  select(Tor_hitting, -Rank)
+
+Tor_hitting_clean
+```
+
+Split into training, validation and testing data:
+
+```{r}
+hitting_split <- 
+  initial_validation_split(Tor_hitting, prop = c(0.6, 0.2))
+  training <- training(hitting_split)
+  validation <- validation(hitting_split)
+  test <- testing(hitting_split)
+hitting_split
+```
