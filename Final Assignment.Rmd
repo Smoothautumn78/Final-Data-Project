@@ -19,61 +19,48 @@ library(arrow)
 Tor_hitting <- read_csv("TOR_batting.csv")
 ```
 
+```{r}
+NHL_draft <- read_csv("nhldraft.csv")
+NHL_draft
+```
+
 # Cleaning:
 
 ```{r}
-Tor_hitting_clean <- Tor_hitting |>
-  select(-Rank) |>
-  mutate(
-    day = 1,
-    month = 1,
-    year = make_date(Year, month, day)
-    ) |>
-  select(-Year, -day, -month) |>
-  select(year, everything()) |>
-  group_by(year) |>
-  rename(c(
-    "G" = Games,
-    "PA" = Plate_Appearances,
-    "AB" = At_Bats,
-    "R" = Runs,
-    "H" = Hits,
-    "2B" = Doubles,
-    "3B" = Triples,
-    "HR" = Home_Runs,
-    "RBI" = Runs_Batted_In,
-    "SB" = Stolen_Bases,
-    "CS" = Caught_Stealing,
-    "BB" = Base_On_Balls,
-    "K" = Strikeouts,
-    "AVG" = Batting_Average,
-    "OBP" = On_Base_Percentage,
-    "SLG" = Slugging_Percentage,
-    "OPS" = On_Base_Plus_Slugging_Percentage,
-    "OPS+" = On_Base_Plus_Slugging_Percentage_Plus,
-    "TB" = Total_Bases,
-    "GIDP" = Double_Plays_Grounded_Into,
-    "HBP" = Times_Hit_By_Pitch,
-    "SAC" = Sacrifice_Hits,
-    "SF" = Sacrifice_Flies,
-    "IBB" = Intentional_Bases_on_Balls
-  )) |>
-  summarise(
-    OBP_average = (sum(H) + sum(BB) + sum(HBP))/(sum(AB)+sum(BB) + sum(HBP) + sum(SF)),
-    SLG_average = sum(TB)/sum(AB),
-    OPS_average = OBP_average + SLG_average
-  )
+NHL_draft_clean <- NHL_draft |>
+  select(-id) |>
+  mutate(points_per_game = points/games_played,
+         position = as.factor(position))
 
-Tor_hitting_clean
+group <- function(data, dataframe, group) {
+  data_frame <- data |>
+    group_by({{ group }}) |>
+    summarise(points = sum(points, na.rm = TRUE),
+            games_played = sum(games_played, na.rm = TRUE),
+            points_per_game = points/games_played)
+}
+NHL_draft_clean
 ```
 
 # Split into training, validation and testing data:
 
 ```{r}
-hitting_split <- 
-  initial_validation_split(Tor_hitting, prop = c(0.6, 0.2))
-  training <- training(hitting_split)
-  validation <- validation(hitting_split)
-  test <- testing(hitting_split)
-hitting_split
+NHL_split <- 
+  initial_validation_split(NHL_draft_clean, prop = c(0.6, 0.2))
+  training <- training(NHL_split)
+  validation <- validation(NHL_split)
+  test <- testing(NHL_split)
+NHL_split
+```
+
+```{r}
+points_year <- training |>
+  group(training, year) |>
+  filter(year <= 1996)
+points_per_game_until_1996 <- points_year |>
+  ggplot(aes(x = year, y = points_per_game)) +
+  geom_col() +
+  geom_smooth(colour = "red", method = "lm", se = FALSE, formula = y ~ x)
+points_per_game_until_1996
+points_year
 ```
