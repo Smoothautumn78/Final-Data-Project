@@ -3,10 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*.
-
 ```{r}
 suppressPackageStartupMessages({
 library(tidyverse)
@@ -17,22 +13,61 @@ library(arrow)
 })
 ```
 
-Import Data:
+# Import Data:
 
 ```{r}
 Tor_hitting <- read_csv("TOR_batting.csv")
 ```
 
-Cleaning:
+# Cleaning:
 
 ```{r}
-Tor_hitting_clean <- 
-  select(Tor_hitting, -Rank)
+Tor_hitting_clean <- Tor_hitting |>
+  select(-Rank) |>
+  mutate(
+    day = 1,
+    month = 1,
+    year = make_date(Year, month, day)
+    ) |>
+  select(-Year, -day, -month) |>
+  select(year, everything()) |>
+  group_by(year) |>
+  rename(c(
+    "G" = Games,
+    "PA" = Plate_Appearances,
+    "AB" = At_Bats,
+    "R" = Runs,
+    "H" = Hits,
+    "2B" = Doubles,
+    "3B" = Triples,
+    "HR" = Home_Runs,
+    "RBI" = Runs_Batted_In,
+    "SB" = Stolen_Bases,
+    "CS" = Caught_Stealing,
+    "BB" = Base_On_Balls,
+    "K" = Strikeouts,
+    "AVG" = Batting_Average,
+    "OBP" = On_Base_Percentage,
+    "SLG" = Slugging_Percentage,
+    "OPS" = On_Base_Plus_Slugging_Percentage,
+    "OPS+" = On_Base_Plus_Slugging_Percentage_Plus,
+    "TB" = Total_Bases,
+    "GIDP" = Double_Plays_Grounded_Into,
+    "HBP" = Times_Hit_By_Pitch,
+    "SAC" = Sacrifice_Hits,
+    "SF" = Sacrifice_Flies,
+    "IBB" = Intentional_Bases_on_Balls
+  )) |>
+  summarise(
+    OBP_average = (sum(H) + sum(BB) + sum(HBP))/(sum(AB)+sum(BB) + sum(HBP) + sum(SF)),
+    SLG_average = sum(TB)/sum(AB),
+    OPS_average = OBP_average + SLG_average
+  )
 
 Tor_hitting_clean
 ```
 
-Split into training, validation and testing data:
+# Split into training, validation and testing data:
 
 ```{r}
 hitting_split <- 
