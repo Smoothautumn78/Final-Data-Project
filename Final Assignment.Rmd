@@ -64,3 +64,45 @@ points_per_game_until_1996 <- points_year |>
 points_per_game_until_1996
 points_year
 ```
+
+# Model Plot 1 and 2
+
+-   **Plot 1 Analysis:**
+    -   **Games played as a predictor**: The graph shows how the number of games played correlates with points_per_game, indicating that players with more experience tend to perform better. This suggests that games_played is a relevant feature for predicting player effectiveness.
+    -   **Position-based variance**: By colouring the points by position, the plot reveals how the relationship between games_played and points_per_game may vary across different positions. This suggests that the model should account for both games_played and position to improve predictions.
+-   **Plot 2 Analysis:**
+    -   **Overall pick as a predictor**: The graph shows how a players overall pick correlates with points_per_game, suggesting that lower overall picks (e.g. 1st overall) are likely to perform better. This relationship makes overall_pick a valuable feature for predicting player performance.
+    -   **Position-based variance**: By coloring the points by position, the graph highlights potential interactions between overall picks and position type, suggesting the need to include both overall_pick and positon in the model for more accurate predictions.
+
+```{r}
+model_plot_1 <- training |>
+  ggplot(aes(x = games_played, y = points_per_game, color = position)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+  labs(
+    title = "Relationship Between Games Played and Points Per Game by Position",
+    x = "Games Played",
+    y = "Points Per Game",
+    color = "Position"
+  ) +
+  theme_minimal()
+
+
+model_plot_2 <- training |>
+  filter(!is.na(overall_pick)) |>  
+  ggplot(aes(x = overall_pick, y = points_per_game, color = position)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linetype = "dashed") +
+  labs(
+    title = "Overall Pick vs. Points Per Game by Position",
+    x = "Overall Pick (Lower is Better)",
+    y = "Points Per Game",
+    color = "Position"
+  ) +
+  theme_minimal()
+
+model_plot_1
+model_plot_2
+
+
+```
