@@ -104,5 +104,68 @@ model_plot_2 <- training |>
 model_plot_1
 model_plot_2
 
+```
+#Linear Models:
+```{r}
+linear_recipe_1 = recipe(points_per_game ~ games_played , data = NHL_draft_clean)
+recipe_1_plot=workflow()|>
+add_model(linear_reg())|>
+add_recipe(linear_recipe_1)|>
+fit(training)|>
+predict(new_data=validation)|>
+bind_cols(validation)|>
+ggplot()+
+aes(x=games_played,y=.pred)+
+geom_point()
+recipe_1_plot+
+  labs(
+    title = "Relationship Between Games Played and Points Per Game",
+    x = "Games Played",
+    y = "Points Per Game"
+  )
+
+linear_recipe_2 = recipe(points_per_game ~ overall_pick  , data = NHL_draft_clean)
+recipe_2_plot=workflow()|>
+add_model(linear_reg())|>
+add_recipe(linear_recipe_2)|>
+fit(training)|>
+predict(new_data=validation)|>
+bind_cols(validation)|>
+ggplot()+
+aes(x=overall_pick,y=.pred)+
+geom_point()
+recipe_2_plot+
+  labs(
+    title = "Overall Pick vs. Points Per Game",
+    x = "Overall Pick (Lower is Better)",
+    y = "Points Per Game"
+  )
+NHL_recipes=list(
+  basic = linear_recipe_1,
+  interact = linear_recipe_2  
+)
+```
+#Final Linear Model:
+```{r}
+
+#Setting up workflow
+lm_model=linear_reg()|>
+set_engine("lm")
+NHL_workflow_set=workflow_set(preproc = NHL_recipes, models = list(lm=lm_model))
+
+NHL_workflow_set
+#Fitting to the training data
+NHL_fit = workflow_map(
+  NHL_workflow_set, fn="tune_grid", seed = 15,
+  resamples=validation_set(NHL_split)
+)
+
+NHL_fit |>
+    collect_metrics() |>
+    ggplot() +
+    aes(x = wflow_id, y = mean) +
+    geom_col(fill = "lightgrey", colour = "black") +
+    facet_wrap(~ .metric, scales = "free")
 
 ```
+
