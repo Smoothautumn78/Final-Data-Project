@@ -17,6 +17,11 @@ library(ggplot2)
 library(ggridges)
 })
 ```
+#Introduction
+The NHL or National Hockey League is one of the most popular sports leagues watched around the world, many Canadians and hockey lovers enjoy the intense and high-energy games every season. Each year, the NHL Draft occurs where teams select young players from around the world playing a crucial role in shaping the future of the team. The NHL draft not only affects the immediate future of the teams but also impacts the long term success and dynamics of the league in general. Finding correlations and relationships between which drafted players will develop into high-performing athletes is essential for teams aiming to build competitive teams with many players averaging high points per game elevating them to the next level.
+
+#Research Goals
+The goal of our analysis is to figure out the factors (variables) that influence and correlate with the success of NHL players after they are drafted. The success of NHL players is measured through our target variable points per game. Our analysis and plots aim to explore how different aspects such as draft position, number of games played, and player position relate to a player's performance and success on the ice. By examining these relationships, patterns and correlations, we try to identify trends that can help predict which players are likely to perform highly for our target variable. Lastly, these trends and analyses can be used by teams to help assist in drafting players with a high statistical chance of success. 
 
 # Import Data:
 
@@ -215,5 +220,13 @@ NHL_fit |>
     aes(x = wflow_id, y = mean) +
     geom_col(fill = "lightgrey", colour = "black") +
     facet_wrap(~ .metric, scales = "free")
+
+#Conclussion
+The analysis created by our group identifies key factors that correlate with NHL player performance after being drafted. Our analysis looks at points per game as the target variable and how relations with other variables affected that number. Our analysis shows that higher draft picks tend to have a strong relation, with an increased points per game value (our target variable), this essentially indicates that early selections can lead to more successful NHL players as shown by their increased points per game. 
+Additionally, our analysis concludes that the number of games played by a player indicates NHL experience and consistency at a professional level, often leading to an increased point per game value. Lastly, our analysis identifies player position to also influence NHL performance, our plots and analysis examine the relation that further achieves higher points per game compared to defensemen and goaltenders.
+The final linear model looks at the relationship between draft position and points per game and this was chosen by our group because of its lower RMSE. A lower RMSE shows that the model has better efficiency and accuracy with fewer errors than other models that influence our selection. All in all, these findings provide a more valuable understanding of how draft position and other factors influence player success, offering insights into past drafting outcomes and strategies.
+
+#Limitations:
+ While our analysis shows many valuable insights and trends about  NHL players and what affects their points per game, some limitations of the dataset can be identified and found. The dataset we used for our analysis includes only quantitative performance variables that measure success based on numbers. Our dataset fails to account for and cover qualitative factors such as leadership, adaptability, or team dynamics, which are big factors when measuring a player's success and value to a team. Additionally, while the data tracks key statistics like points and games played, it lacks other detailed statistics that could provide a more complete view of  NHL player performance. Potential variables measuring fitness levels and max heart rate could potentially make our insights and analysis more accurate. By recognizing and taking into mind these limitations a fair interpretation and perception of the results can be observed.
 
 ```
