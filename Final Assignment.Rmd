@@ -1,6 +1,8 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "NHL Points Per Game Report"
+author: "Group 9"
+date: "December 4, 2024"
+output: pdf_document
 ---
 
 ```{r}
@@ -10,6 +12,9 @@ library(patchwork)
 theme_set(theme_bw())
 library(tidymodels)
 library(arrow)
+library(stringr)
+library(ggplot2)
+library(ggridges)
 })
 ```
 
@@ -30,7 +35,27 @@ NHL_draft
 NHL_draft_clean <- NHL_draft |>
   select(-id) |>
   mutate(points_per_game = points/games_played,
-         position = as.factor(position))
+         # Change values so that whatever comes first, is what is outputted
+         position = str_replace(position, "Centr", "C"), 
+         position = str_replace(position, "C; LW", "C"), 
+         position = str_replace(position, "C; RW", "C"), 
+         position = str_replace(position, "C / R", "C"),
+         position = str_replace(position, "C RW", "C"),
+         position = str_replace(position, "L/RW", "W"),
+         position = str_replace(position, "C/W", "F"),
+         position = str_replace(position, "D/C", "D"),
+         position = str_replace(position, "D/LW", "D"),
+         position = str_replace(position, "D/RW", "D"),
+         position = str_replace(position, "LW/C", "LW"),
+         position = str_replace(position, "RW/C", "RW"),
+         position = str_replace(position, "C/D", "C"),
+         position = str_replace(position, "C/RW", "C"),
+         position = str_replace(position, "C/LW", "C"),
+         position = str_replace(position, "LW/D", "LW"),
+         position = str_replace(position, "RW/D", "RW"),
+         position = as.factor(position),
+         pick_in_round = overall_pick %% 31
+  )
 
 group <- function(data, dataframe, group) {
   data_frame <- data |>
@@ -53,17 +78,35 @@ NHL_split <-
 NHL_split
 ```
 
+# Exploratory Plot 1
+
 ```{r}
-points_year <- training |>
-  group(training, year) |>
-  filter(year <= 1996)
-points_per_game_until_1996 <- points_year |>
-  ggplot(aes(x = year, y = points_per_game)) +
-  geom_col() +
-  geom_smooth(colour = "red", method = "lm", se = FALSE, formula = y ~ x)
-points_per_game_until_1996
-points_year
+position_by_year <- training |>
+  ggplot(aes(x = pick_in_round, y = team)) +
+  geom_density_ridges(bandwidth = 1)
+
+position_by_year
 ```
+
+# Exploratory Plot 2
+
+```{r}
+teams_by_draft_pick <- training |>
+  ggplot(aes(x = position, y = overall_pick)) +
+  geom_boxplot(fill = "aquamarine")
+
+teams_by_draft_pick
+```
+
+# Exploratory Plot Analysis
+
+-   **Plot 1:**
+
+    -   Comparing team by pick in round: This graph shows where each team has picked in the draft in the past. This graph helps give us an idea with where teams usually pick in the draft so that if we see that teams have good players, we can connect that to picking lower in the draft rounds.
+
+-   **Plot 2:**
+
+    -   Comparing position to overall pick: This graph shows where each position is picked in the draft generally. It seems that goalies tend to be picked higher and Left Wingers tend to be picked lower in the draft. This can be factored in later as if position tends to be a better position in points per game, we can attribute that back to that left wingers are picked lower generally in the draft.
 
 # Model Plot 1 and 2
 
@@ -104,8 +147,11 @@ model_plot_2 <- training |>
 model_plot_1
 model_plot_2
 
+
 ```
-#Linear Models:
+
+# Linear Models:
+
 ```{r}
 linear_recipe_1 = recipe(points_per_game ~ games_played , data = NHL_draft_clean)
 recipe_1_plot=workflow()|>
@@ -144,8 +190,11 @@ NHL_recipes=list(
   basic = linear_recipe_1,
   interact = linear_recipe_2  
 )
+
 ```
-#Final Linear Model:
+
+# Final Linear Model:
+
 ```{r}
 
 #Setting up workflow
@@ -168,4 +217,3 @@ NHL_fit |>
     facet_wrap(~ .metric, scales = "free")
 
 ```
-
